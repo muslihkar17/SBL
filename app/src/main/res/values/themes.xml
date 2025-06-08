@@ -1,0 +1,22 @@
+
+    <!-- Base application theme. -->
+    <resources xmlns:tools="http://schemas.android.com/tools">
+        <style name="Theme.ProjectFinalMuslih" parent="Theme.MaterialComponents.DayNight.DarkActionBar">
+            <!-- Warna Utama -->
+            <item name="colorPrimary">@color/purple_500</item>
+            <item name="colorPrimaryVariant">@color/purple_700</item>
+            <item name="colorOnPrimary">@color/white</item>
+            <item name="colorSecondary">@color/teal_200</item>
+            <item name="colorOnSecondary">@color/black</item>
+
+            <!-- Latar belakang dan font -->
+            <item name="android:windowBackground">@color/white</item>
+            <item name="android:textColorPrimary">@color/black</item>
+
+            <!-- Material -->
+
+            <item name="materialButtonStyle">@style/Widget.MaterialComponents.Button</item>
+        </style>
+    </resources>
+
+
