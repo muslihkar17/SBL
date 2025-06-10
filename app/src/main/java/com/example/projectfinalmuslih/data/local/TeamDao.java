@@ -1,3 +1,5 @@
+// File: app/src/main/java/com/example/projectfinalmuslih/data/local/TeamDao.java
+
 package com.example.projectfinalmuslih.data.local;
 
 import androidx.room.Dao;
@@ -15,7 +17,7 @@ public interface TeamDao {
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     void insertAll(List<Team> teams);
 
-    // TAMBAHKAN METODE DI BAWAH INI
-    @Query("DELETE FROM teams")
-    void deleteAll();
+    // HAPUS deleteAll() DAN GANTI DENGAN INI:
+    @Query("DELETE FROM teams WHERE idLeague = :leagueId")
+    void deleteByLeague(String leagueId);
 }

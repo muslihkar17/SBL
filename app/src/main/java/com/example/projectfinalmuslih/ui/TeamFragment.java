@@ -21,12 +21,10 @@ import androidx.navigation.ui.AppBarConfiguration;
 import androidx.navigation.ui.NavigationUI;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
-import androidx.room.Room;
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
 
 import com.example.projectfinalmuslih.R;
 import com.example.projectfinalmuslih.adapter.TeamAdapter;
-import com.example.projectfinalmuslih.data.local.AppDatabase;
 import com.example.projectfinalmuslih.data.model.Team;
 import com.example.projectfinalmuslih.data.model.TeamResponse;
 import com.example.projectfinalmuslih.data.network.ApiClient;
@@ -48,14 +46,11 @@ public class TeamFragment extends Fragment {
     private EditText searchEditText;
 
     private ApiService apiService;
-    private AppDatabase appDatabase;
     private ExecutorService executor;
     private Handler handler;
     private List<Team> allTeams = new ArrayList<>();
     private String leagueId;
     private String leagueName;
-
-    // Di dalam TeamFragment.java
 
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
@@ -64,16 +59,13 @@ public class TeamFragment extends Fragment {
             leagueId = TeamFragmentArgs.fromBundle(getArguments()).getLeagueId();
             leagueName = TeamFragmentArgs.fromBundle(getArguments()).getLeagueName();
 
-            // TAMBAHKAN LOG INI untuk melihat ID yang diterima
-            android.util.Log.d("ID_TRACE", "TeamFragment MENERIMA ID: " + leagueId + " (" + leagueName + ")");
+            // Debugger: Log ID yang diterima
+            android.util.Log.d("ID_TRACE", "TeamFragment MENERIMA ID: " + leagueId + " dan NAMA: " + leagueName); // Perbarui log
         }
 
         executor = Executors.newSingleThreadExecutor();
         handler = new Handler(Looper.getMainLooper());
         apiService = ApiClient.getClient().create(ApiService.class);
-        appDatabase = Room.databaseBuilder(requireContext().getApplicationContext(), AppDatabase.class, "sports-db")
-                .fallbackToDestructiveMigration()
-                .build();
     }
 
     @Override
@@ -104,13 +96,11 @@ public class TeamFragment extends Fragment {
         recyclerView.setAdapter(adapter);
 
         adapter.setOnItemClickListener(team -> {
-            // Buat sebuah "paket" data (Bundle) untuk menampung argumen
             Bundle bundle = new Bundle();
             bundle.putString("teamName", team.strTeam);
             bundle.putString("teamBadgeUrl", team.strTeamBadge);
             bundle.putString("teamDescription", team.strDescriptionEN);
 
-            // Panggil navigasi menggunakan ID dari action dan kirimkan "paket" datanya
             Navigation.findNavController(view).navigate(R.id.action_teamFragment_to_teamDetailFragment, bundle);
         });
 
@@ -131,41 +121,35 @@ public class TeamFragment extends Fragment {
         fetchTeams();
     }
 
-
     private void fetchTeams() {
-        android.util.Log.d("ID_TRACE", "TeamFragment MENGGUNAKAN ID: " + this.leagueId + " untuk mengambil data.");
+        // PERUBAHAN DI SINI: Menggunakan leagueName untuk panggilan API
+        android.util.Log.d("ID_TRACE", "TeamFragment MENGGUNAKAN NAMA LIGA: " + this.leagueName + " untuk mengambil data."); // Perbarui log
         swipeRefreshLayout.setRefreshing(true);
         executor.execute(() -> {
             try {
-                Response<TeamResponse> response = apiService.getTeams(leagueId).execute();
-                if (response.isSuccessful() && response.body() != null) {
-                    List<Team> teams = response.body().getTeams();
-                    if (teams != null) {
-                        for(Team team : teams) {
-                            team.idLeague = leagueId;
-                        }
-
-                        // --- MULAI PERUBAHAN LOGIKA ---
-                        // 1. Hapus semua tim lama dari database
-                        appDatabase.teamDao().deleteAll();
-
-                        // 2. Masukkan tim yang baru untuk liga ini
-                        appDatabase.teamDao().insertAll(teams);
-                        // --- AKHIR PERUBAHAN LOGIKA ---
-                    }
-                }
-            } catch (IOException e) {
-                handler.post(() -> Toast.makeText(getContext(), "Gagal mengambil data baru, menampilkan data offline.", Toast.LENGTH_SHORT).show());
-            } finally {
-                List<Team> teamsFromDb = appDatabase.teamDao().getTeamsByLeague(leagueId);
+                // Menggunakan getTeams dengan nama liga
+                Response<TeamResponse> response = apiService.getTeams(leagueName).execute();
                 handler.post(() -> {
-                    allTeams.clear();
-                    if (teamsFromDb != null && !teamsFromDb.isEmpty()) {
-                        allTeams.addAll(teamsFromDb);
+                    if (response.isSuccessful() && response.body() != null) {
+                        List<Team> fetchedTeams = response.body().getTeams();
+                        allTeams.clear();
+                        if (fetchedTeams != null) {
+                            allTeams.addAll(fetchedTeams);
+                        } else {
+                            // Pesan error yang lebih spesifik
+                            Toast.makeText(getContext(), "API mengembalikan respons sukses tetapi daftar tim kosong untuk " + leagueName + ".", Toast.LENGTH_LONG).show();
+                        }
+                        adapter.submitList(new ArrayList<>(allTeams));
                     } else {
-                        Toast.makeText(getContext(), "Tidak ada data tim yang tersedia.", Toast.LENGTH_SHORT).show();
+                        // Pesan error yang lebih spesifik
+                        Toast.makeText(getContext(), "Gagal mengambil data tim dari API untuk " + leagueName + ": " + response.code() + " " + response.message(), Toast.LENGTH_LONG).show();
                     }
-                    adapter.submitList(new ArrayList<>(allTeams));
+                    swipeRefreshLayout.setRefreshing(false);
+                });
+            } catch (IOException e) {
+                handler.post(() -> {
+                    Toast.makeText(getContext(), "Koneksi gagal atau terjadi error: " + e.getMessage(), Toast.LENGTH_LONG).show();
+                    adapter.submitList(new ArrayList<>());
                     swipeRefreshLayout.setRefreshing(false);
                 });
             }

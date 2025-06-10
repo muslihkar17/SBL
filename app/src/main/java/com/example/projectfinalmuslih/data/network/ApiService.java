@@ -11,6 +11,7 @@ public interface ApiService {
     @GET("all_leagues.php")
     Call<LeagueResponse> getLeagues();
 
-    @GET("lookup_all_teams.php")
-    Call<TeamResponse> getTeams(@Query("id") String leagueId);
+    // PERUBAHAN DI SINI: Menggunakan endpoint search_all_teams.php dengan parameter 'l' (nama liga)
+    @GET("search_all_teams.php")
+    Call<TeamResponse> getTeams(@Query("l") String leagueName);
 }

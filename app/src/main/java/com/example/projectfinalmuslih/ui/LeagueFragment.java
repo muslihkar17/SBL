@@ -21,12 +21,10 @@ import androidx.navigation.ui.AppBarConfiguration;
 import androidx.navigation.ui.NavigationUI;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
-import androidx.room.Room;
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
 
 import com.example.projectfinalmuslih.R;
 import com.example.projectfinalmuslih.adapter.LeagueAdapter;
-import com.example.projectfinalmuslih.data.local.AppDatabase;
 import com.example.projectfinalmuslih.data.model.League;
 import com.example.projectfinalmuslih.data.model.LeagueResponse;
 import com.example.projectfinalmuslih.data.network.ApiClient;
@@ -48,7 +46,6 @@ public class LeagueFragment extends Fragment {
     private EditText searchEditText;
 
     private ApiService apiService;
-    private AppDatabase appDatabase;
     private ExecutorService executor;
     private Handler handler;
     private List<League> allLeagues = new ArrayList<>();
@@ -59,10 +56,6 @@ public class LeagueFragment extends Fragment {
         executor = Executors.newSingleThreadExecutor();
         handler = new Handler(Looper.getMainLooper());
         apiService = ApiClient.getClient().create(ApiService.class);
-
-        appDatabase = Room.databaseBuilder(requireContext().getApplicationContext(), AppDatabase.class, "sports-db")
-                .fallbackToDestructiveMigration()
-                .build();
     }
 
     @Override
@@ -92,10 +85,8 @@ public class LeagueFragment extends Fragment {
         adapter = new LeagueAdapter();
         recyclerView.setAdapter(adapter);
 
-        // Di dalam LeagueFragment.java -> onViewCreated()
-
         adapter.setOnItemClickListener(league -> {
-            // TAMBAHKAN LOG INI untuk melihat ID yang dikirim
+            // Debugger: Log ID yang dikirim dari LeagueFragment
             android.util.Log.d("ID_TRACE", "LeagueFragment MENGIRIM ID: " + league.idLeague + " (" + league.strLeague + ")");
 
             LeagueFragmentDirections.ActionLeagueFragmentToTeamFragment action =
@@ -125,21 +116,25 @@ public class LeagueFragment extends Fragment {
         executor.execute(() -> {
             try {
                 Response<LeagueResponse> response = apiService.getLeagues().execute();
-                if (response.isSuccessful() && response.body() != null) {
-                    appDatabase.leagueDao().insertAll(response.body().getLeagues());
-                }
-            } catch (IOException e) {
-                handler.post(() -> Toast.makeText(getContext(), "Gagal mengambil data baru, menampilkan data offline.", Toast.LENGTH_SHORT).show());
-            } finally {
-                List<League> leaguesFromDb = appDatabase.leagueDao().getAllLeagues();
                 handler.post(() -> {
-                    allLeagues.clear();
-                    if (leaguesFromDb != null && !leaguesFromDb.isEmpty()) {
-                        allLeagues.addAll(leaguesFromDb);
+                    if (response.isSuccessful() && response.body() != null) {
+                        List<League> fetchedLeagues = response.body().getLeagues();
+                        allLeagues.clear();
+                        if (fetchedLeagues != null && !fetchedLeagues.isEmpty()) {
+                            allLeagues.addAll(fetchedLeagues);
+                        } else {
+                            Toast.makeText(getContext(), "Tidak ada data liga yang tersedia dari API.", Toast.LENGTH_SHORT).show();
+                        }
+                        adapter.submitList(new ArrayList<>(allLeagues));
                     } else {
-                        Toast.makeText(getContext(), "Tidak ada data yang tersedia.", Toast.LENGTH_SHORT).show();
+                        Toast.makeText(getContext(), "Gagal mengambil data liga dari API: " + response.code(), Toast.LENGTH_SHORT).show();
                     }
-                    adapter.submitList(new ArrayList<>(allLeagues));
+                    swipeRefreshLayout.setRefreshing(false);
+                });
+            } catch (IOException e) {
+                handler.post(() -> {
+                    Toast.makeText(getContext(), "Koneksi gagal atau terjadi error: " + e.getMessage(), Toast.LENGTH_LONG).show();
+                    adapter.submitList(new ArrayList<>());
                     swipeRefreshLayout.setRefreshing(false);
                 });
             }
