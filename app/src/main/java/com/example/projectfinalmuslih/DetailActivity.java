@@ -27,7 +27,7 @@ public class DetailActivity extends AppCompatActivity {
     private TextView detailTitle;
     private TeamAdapter adapter;
     private ApiService apiService;
-    private int leagueId;
+    private String leagueId; // <-- PERUBAHAN 1: Tipe data diubah ke String
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -44,14 +44,15 @@ public class DetailActivity extends AppCompatActivity {
 
         apiService = ApiClient.getClient().create(ApiService.class);
 
-        leagueId = getIntent().getIntExtra("league_id", -1);
+        // --- PERUBAHAN 2: Cara mengambil data dari Intent ---
+        leagueId = getIntent().getStringExtra("league_id");
         String leagueName = getIntent().getStringExtra("league_name");
 
         if (leagueName != null) {
             detailTitle.setText("Daftar Tim di " + leagueName);
         }
 
-        if (leagueId != -1) {
+        if (leagueId != null && !leagueId.isEmpty()) {
             fetchTeams();
         } else {
             Toast.makeText(this, "ID liga tidak ditemukan", Toast.LENGTH_SHORT).show();
@@ -62,6 +63,7 @@ public class DetailActivity extends AppCompatActivity {
 
     private void fetchTeams() {
         btnRefresh.setEnabled(false);
+        // Pemanggilan ini sekarang sudah benar karena leagueId adalah String
         apiService.getTeams(leagueId).enqueue(new Callback<TeamResponse>() {
             @Override
             public void onResponse(Call<TeamResponse> call, Response<TeamResponse> response) {

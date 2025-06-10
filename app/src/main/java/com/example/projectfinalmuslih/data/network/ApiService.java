@@ -12,5 +12,5 @@ public interface ApiService {
     Call<LeagueResponse> getLeagues();
 
     @GET("lookup_all_teams.php")
-    Call<TeamResponse> getTeams(@Query("id") int leagueId);
+    Call<TeamResponse> getTeams(@Query("id") String leagueId);
 }

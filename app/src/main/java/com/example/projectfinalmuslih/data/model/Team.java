@@ -19,6 +19,6 @@ public class Team {
     @SerializedName("strDescriptionEN")
     public String strDescriptionEN;
 
-    @SerializedName("idLeague")
-    public int idLeague;
+    @SerializedName("idLeague") // <-- TAMBAHKAN ANOTASI INI
+    public String idLeague;
 }

@@ -22,10 +22,13 @@ public class LeagueAdapter extends ListAdapter<League, LeagueAdapter.LeagueViewH
     }
 
     private static final DiffUtil.ItemCallback<League> DIFF_CALLBACK = new DiffUtil.ItemCallback<League>() {
+        // ...
         @Override
         public boolean areItemsTheSame(@NonNull League oldItem, @NonNull League newItem) {
-            return oldItem.idLeague == newItem.idLeague;
+            // Gunakan .equals() untuk membandingkan String
+            return oldItem.idLeague.equals(newItem.idLeague);
         }
+// ...
 
         @Override
         public boolean areContentsTheSame(@NonNull League oldItem, @NonNull League newItem) {

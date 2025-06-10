@@ -52,8 +52,10 @@ public class TeamFragment extends Fragment {
     private ExecutorService executor;
     private Handler handler;
     private List<Team> allTeams = new ArrayList<>();
-    private int leagueId;
+    private String leagueId;
     private String leagueName;
+
+    // Di dalam TeamFragment.java
 
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
@@ -61,6 +63,9 @@ public class TeamFragment extends Fragment {
         if (getArguments() != null) {
             leagueId = TeamFragmentArgs.fromBundle(getArguments()).getLeagueId();
             leagueName = TeamFragmentArgs.fromBundle(getArguments()).getLeagueName();
+
+            // TAMBAHKAN LOG INI untuk melihat ID yang diterima
+            android.util.Log.d("ID_TRACE", "TeamFragment MENERIMA ID: " + leagueId + " (" + leagueName + ")");
         }
 
         executor = Executors.newSingleThreadExecutor();
@@ -126,7 +131,9 @@ public class TeamFragment extends Fragment {
         fetchTeams();
     }
 
+
     private void fetchTeams() {
+        android.util.Log.d("ID_TRACE", "TeamFragment MENGGUNAKAN ID: " + this.leagueId + " untuk mengambil data.");
         swipeRefreshLayout.setRefreshing(true);
         executor.execute(() -> {
             try {
@@ -137,7 +144,14 @@ public class TeamFragment extends Fragment {
                         for(Team team : teams) {
                             team.idLeague = leagueId;
                         }
+
+                        // --- MULAI PERUBAHAN LOGIKA ---
+                        // 1. Hapus semua tim lama dari database
+                        appDatabase.teamDao().deleteAll();
+
+                        // 2. Masukkan tim yang baru untuk liga ini
                         appDatabase.teamDao().insertAll(teams);
+                        // --- AKHIR PERUBAHAN LOGIKA ---
                     }
                 }
             } catch (IOException e) {

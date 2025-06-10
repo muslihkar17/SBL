@@ -92,7 +92,12 @@ public class LeagueFragment extends Fragment {
         adapter = new LeagueAdapter();
         recyclerView.setAdapter(adapter);
 
+        // Di dalam LeagueFragment.java -> onViewCreated()
+
         adapter.setOnItemClickListener(league -> {
+            // TAMBAHKAN LOG INI untuk melihat ID yang dikirim
+            android.util.Log.d("ID_TRACE", "LeagueFragment MENGIRIM ID: " + league.idLeague + " (" + league.strLeague + ")");
+
             LeagueFragmentDirections.ActionLeagueFragmentToTeamFragment action =
                     LeagueFragmentDirections.actionLeagueFragmentToTeamFragment(league.idLeague, league.strLeague);
             Navigation.findNavController(view).navigate(action);

@@ -3,13 +3,15 @@ package com.example.projectfinalmuslih.data.model;
 import androidx.room.Entity;
 import androidx.room.PrimaryKey;
 import com.google.gson.annotations.SerializedName;
+import androidx.annotation.NonNull; // Pastikan ini di-import
 
 @Entity(tableName = "leagues")
 public class League {
 
     @PrimaryKey
+    @NonNull // <-- TAMBAHKAN ANOTASI INI
     @SerializedName("idLeague")
-    public int idLeague;
+    public String idLeague;
 
     @SerializedName("strLeague")
     public String strLeague;

@@ -22,7 +22,7 @@
         tools:layout="@layout/fragment_team">
         <argument
             android:name="league_id"
-            app:argType="integer" />
+            app:argType="string" />
         <argument
             android:name="league_name"
             app:argType="string" />
