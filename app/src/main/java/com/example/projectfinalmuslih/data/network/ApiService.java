@@ -1,7 +1,6 @@
 package com.example.projectfinalmuslih.data.network;
 
 import com.example.projectfinalmuslih.data.model.LeagueResponse;
-import com.example.projectfinalmuslih.data.model.PlayerResponse;
 import com.example.projectfinalmuslih.data.model.TeamResponse;
 
 import retrofit2.Call;
@@ -14,8 +13,4 @@ public interface ApiService {
 
     @GET("lookup_all_teams.php")
     Call<TeamResponse> getTeams(@Query("id") int leagueId);
-
-    // PASTIKAN METODE INI MENGGUNAKAN "int teamId"
-    @GET("lookup_all_players.php")
-    Call<PlayerResponse> getPlayers(@Query("id") int teamId);
 }

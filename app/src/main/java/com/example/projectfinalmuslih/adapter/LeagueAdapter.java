@@ -63,12 +63,16 @@ public class LeagueAdapter extends ListAdapter<League, LeagueAdapter.LeagueViewH
             });
         }
 
+        // Di dalam kelas LeagueAdapter.java > LeagueViewHolder
         void bind(League league) {
             leagueName.setText(league.strLeague);
+
+            // Gunakan fallback untuk menangani URL yang null dari API
             Glide.with(itemView.getContext())
-                    .load(league.strBadge) // atau strLogo
-                    .placeholder(R.drawable.ic_launcher_background)
-                    .error(R.drawable.ic_launcher_foreground)
+                    .load(league.strBadge)
+                    .placeholder(R.drawable.ic_launcher_background) // Tampil saat memuat
+                    .fallback(R.drawable.ic_launcher_background)  // Tampil jika URL null
+                    .error(R.drawable.ic_launcher_background)     // Tampil jika ada error lain
                     .into(leagueLogo);
         }
     }

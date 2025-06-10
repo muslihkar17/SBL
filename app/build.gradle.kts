@@ -48,15 +48,14 @@ dependencies {
     implementation(libs.recyclerview)
     implementation(libs.navigation.fragment)
     implementation(libs.navigation.ui)
-    // Tambahkan Dependensi ini
-    // Navigation Component
+
     implementation(libs.navigation.fragment.ktx)
     implementation(libs.navigation.ui.ktx)
 
-    // Room Persistence Library
     implementation(libs.room.runtime)
     annotationProcessor(libs.room.compiler)
 
     // Glide (Untuk memuat gambar dari URL)
     implementation(libs.glide)
+    annotationProcessor(libs.glide.compiler)
 }

@@ -63,12 +63,33 @@ public class TeamAdapter extends ListAdapter<Team, TeamAdapter.TeamViewHolder> {
             });
         }
 
+        // Di dalam kelas TeamAdapter.java > TeamViewHolder
         void bind(Team team) {
             teamName.setText(team.strTeam);
+
+            // Kita tetap sertakan log ini untuk memastikan URL tidak null
+            android.util.Log.d("TeamAdapterDebug", "Memproses tim: " + team.strTeam + " | URL Logo: " + team.strTeamBadge);
+
             Glide.with(itemView.getContext())
                     .load(team.strTeamBadge)
-                    .placeholder(R.drawable.ic_launcher_background) // Gambar default
-                    .error(R.drawable.ic_launcher_foreground) // Gambar jika terjadi error
+                    .listener(new com.bumptech.glide.request.RequestListener<android.graphics.drawable.Drawable>() {
+                        @Override
+                        public boolean onLoadFailed(@androidx.annotation.Nullable com.bumptech.glide.load.engine.GlideException e, @androidx.annotation.Nullable Object model, @androidx.annotation.NonNull com.bumptech.glide.request.target.Target<android.graphics.drawable.Drawable> target, boolean isFirstResource) {
+                            // Jika GAGAL, kita catat error lengkapnya ke Logcat
+                            android.util.Log.e("TeamAdapterDebug", "Glide GAGAL memuat gambar. URL: " + model, e);
+                            return false; // return false agar placeholder/error drawable tetap ditampilkan
+                        }
+
+                        @Override
+                        public boolean onResourceReady(@androidx.annotation.NonNull android.graphics.drawable.Drawable resource, @androidx.annotation.NonNull Object model, com.bumptech.glide.request.target.Target<android.graphics.drawable.Drawable> target, @androidx.annotation.NonNull com.bumptech.glide.load.DataSource dataSource, boolean isFirstResource) {
+                            // Jika BERHASIL, kita catat juga sebagai konfirmasi
+                            android.util.Log.d("TeamAdapterDebug", "Glide BERHASIL memuat gambar dari URL: " + model);
+                            return false; // return false agar Glide melanjutkan proses menampilkan gambar ke ImageView
+                        }
+                    })
+                    .placeholder(R.drawable.ic_launcher_background)
+                    .fallback(R.drawable.ic_launcher_background)
+                    .error(R.drawable.ic_launcher_background)
                     .into(teamLogo);
         }
     }

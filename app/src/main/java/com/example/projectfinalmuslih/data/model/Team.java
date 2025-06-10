@@ -13,8 +13,11 @@ public class Team {
     @SerializedName("strTeam")
     public String strTeam;
 
-    @SerializedName("strTeamBadge")
+    @SerializedName("strBadge")
     public String strTeamBadge;
+
+    @SerializedName("strDescriptionEN")
+    public String strDescriptionEN;
 
     @SerializedName("idLeague")
     public int idLeague;

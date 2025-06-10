@@ -27,21 +27,30 @@
             android:name="league_name"
             app:argType="string" />
         <action
-            android:id="@+id/action_teamFragment_to_playerFragment"
-            app:destination="@id/playerFragment" />
+            android:id="@+id/action_teamFragment_to_teamDetailFragment"
+            app:destination="@id/teamDetailFragment" />
     </fragment>
 
     <fragment
-        android:id="@+id/playerFragment"
-        android:name="com.example.projectfinalmuslih.ui.PlayerFragment"
-        android:label="Daftar Pemain"
-        tools:layout="@layout/fragment_player">
+        android:id="@+id/teamDetailFragment"
+        android:name="com.example.projectfinalmuslih.ui.TeamDetailFragment"
+        android:label="Detail Tim"
+        tools:layout="@layout/fragment_team_detail">
         <argument
-            android:name="team_id"
-            app:argType="integer" />
+            android:name="teamName"
+            app:argType="string"
+            app:nullable="true"
+            android:defaultValue="@null" />
         <argument
-            android:name="team_name"
-            app:argType="string" />
+            android:name="teamBadgeUrl"
+            app:argType="string"
+            app:nullable="true"
+            android:defaultValue="@null" />
+        <argument
+            android:name="teamDescription"
+            app:argType="string"
+            app:nullable="true"
+            android:defaultValue="@null" />
     </fragment>
 
     <fragment

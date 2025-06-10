@@ -99,9 +99,14 @@ public class TeamFragment extends Fragment {
         recyclerView.setAdapter(adapter);
 
         adapter.setOnItemClickListener(team -> {
-            TeamFragmentDirections.ActionTeamFragmentToPlayerFragment action =
-                    TeamFragmentDirections.actionTeamFragmentToPlayerFragment(team.idTeam, team.strTeam);
-            Navigation.findNavController(view).navigate(action);
+            // Buat sebuah "paket" data (Bundle) untuk menampung argumen
+            Bundle bundle = new Bundle();
+            bundle.putString("teamName", team.strTeam);
+            bundle.putString("teamBadgeUrl", team.strTeamBadge);
+            bundle.putString("teamDescription", team.strDescriptionEN);
+
+            // Panggil navigasi menggunakan ID dari action dan kirimkan "paket" datanya
+            Navigation.findNavController(view).navigate(R.id.action_teamFragment_to_teamDetailFragment, bundle);
         });
 
         searchEditText.addTextChangedListener(new TextWatcher() {
