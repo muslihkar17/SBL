@@ -20,10 +20,10 @@ import androidx.recyclerview.widget.RecyclerView;
 import androidx.room.Room;
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
 import com.example.projectfinalmuslih.R;
-import com.example.projectfinalmuslih.adapter.LeagueAdapter;
+import com.example.projectfinalmuslih.adapter.TeamAdapter;
 import com.example.projectfinalmuslih.data.local.AppDatabase;
-import com.example.projectfinalmuslih.data.model.League;
-import com.example.projectfinalmuslih.data.model.LeagueResponse;
+import com.example.projectfinalmuslih.data.model.Team;
+import com.example.projectfinalmuslih.data.model.TeamResponse;
 import com.example.projectfinalmuslih.data.network.ApiClient;
 import com.example.projectfinalmuslih.data.network.ApiService;
 import java.io.IOException;
@@ -32,12 +32,14 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import retrofit2.Response;
 
-public class LeagueFragment extends Fragment {
+public class TeamFragment extends Fragment {
 
     private RecyclerView recyclerView;
-    private LeagueAdapter adapter;
+    private TeamAdapter adapter;
     private SwipeRefreshLayout swipeRefreshLayout;
     private View view;
+    private int leagueId;
+    private String leagueName;
 
     private ApiService apiService;
     private AppDatabase appDatabase;
@@ -54,11 +56,16 @@ public class LeagueFragment extends Fragment {
         appDatabase = Room.databaseBuilder(requireContext().getApplicationContext(), AppDatabase.class, "sports-db")
                 .fallbackToDestructiveMigration()
                 .build();
+
+        if (getArguments() != null) {
+            leagueId = TeamFragmentArgs.fromBundle(getArguments()).getLeagueId();
+            leagueName = TeamFragmentArgs.fromBundle(getArguments()).getLeagueName();
+        }
     }
 
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-        view = inflater.inflate(R.layout.fragment_league, container, false);
+        view = inflater.inflate(R.layout.fragment_team, container, false);
         return view;
     }
 
@@ -75,44 +82,53 @@ public class LeagueFragment extends Fragment {
             AppBarConfiguration appBarConfiguration = new AppBarConfiguration.Builder(navController.getGraph()).build();
             NavigationUI.setupWithNavController(toolbar, navController, appBarConfiguration);
         }
-        toolbar.setTitle("Daftar Liga"); // Set title here
+
+        if (leagueName != null) {
+            toolbar.setTitle("Tim di " + leagueName);
+        }
 
         // Find views
         swipeRefreshLayout = view.findViewById(R.id.swipeRefreshLayout);
         recyclerView = view.findViewById(R.id.recyclerView);
         recyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
 
-        adapter = new LeagueAdapter();
+        adapter = new TeamAdapter();
         recyclerView.setAdapter(adapter);
 
-        adapter.setOnItemClickListener(league -> {
-            LeagueFragmentDirections.ActionLeagueFragmentToTeamFragment action =
-                    LeagueFragmentDirections.actionLeagueFragmentToTeamFragment(league.idLeague, league.strLeague);
+        adapter.setOnItemClickListener(team -> {
+            TeamFragmentDirections.ActionTeamFragmentToPlayerFragment action =
+                    TeamFragmentDirections.actionTeamFragmentToPlayerFragment(team.idTeam, team.strTeam);
             Navigation.findNavController(view).navigate(action);
         });
 
-        swipeRefreshLayout.setOnRefreshListener(this::fetchLeagues);
+        swipeRefreshLayout.setOnRefreshListener(this::fetchTeams);
 
-        fetchLeagues();
+        fetchTeams();
     }
 
-    private void fetchLeagues() {
+    private void fetchTeams() {
         swipeRefreshLayout.setRefreshing(true);
         executor.execute(() -> {
             try {
-                Response<LeagueResponse> response = apiService.getLeagues().execute();
+                Response<TeamResponse> response = apiService.getTeams(leagueId).execute();
                 if (response.isSuccessful() && response.body() != null) {
-                    appDatabase.leagueDao().insertAll(response.body().getLeagues());
+                    List<Team> teams = response.body().getTeams();
+                    if (teams != null) {
+                        for(Team team : teams) {
+                            team.idLeague = leagueId; // Memastikan setiap tim memiliki ID liga
+                        }
+                        appDatabase.teamDao().insertAll(teams);
+                    }
                 }
             } catch (IOException e) {
                 handler.post(() -> Toast.makeText(getContext(), "Gagal mengambil data baru, menampilkan data offline.", Toast.LENGTH_SHORT).show());
             } finally {
-                List<League> leaguesFromDb = appDatabase.leagueDao().getAllLeagues();
+                List<Team> teamsFromDb = appDatabase.teamDao().getTeamsByLeague(leagueId);
                 handler.post(() -> {
-                    if (leaguesFromDb != null && !leaguesFromDb.isEmpty()) {
-                        adapter.submitList(leaguesFromDb);
+                    if (teamsFromDb != null && !teamsFromDb.isEmpty()) {
+                        adapter.submitList(teamsFromDb);
                     } else {
-                        Toast.makeText(getContext(), "Tidak ada data yang tersedia.", Toast.LENGTH_SHORT).show();
+                        Toast.makeText(getContext(), "Tidak ada data tim yang tersedia.", Toast.LENGTH_SHORT).show();
                     }
                     swipeRefreshLayout.setRefreshing(false);
                 });
