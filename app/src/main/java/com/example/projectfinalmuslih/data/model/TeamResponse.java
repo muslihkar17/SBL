@@ -4,12 +4,10 @@ import com.google.gson.annotations.SerializedName;
 import java.util.List;
 
 public class TeamResponse {
-    // Gunakan @SerializedName untuk mencocokkan "teams" dari JSON
     @SerializedName("teams")
-    private List<com.example.projectfinalmuslih.Team> teams;
+    private List<Team> teams;
 
-    // Ganti nama metode agar sesuai dan jelas
-    public List<com.example.projectfinalmuslih.Team> getTeams() {
+    public List<Team> getTeams() {
         return teams;
     }
 

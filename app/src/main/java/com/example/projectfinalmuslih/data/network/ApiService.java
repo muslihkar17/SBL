@@ -15,7 +15,6 @@ public interface ApiService {
     @GET("lookup_all_teams.php")
     Call<TeamResponse> getTeams(@Query("id") int leagueId);
 
-    // Tambahkan endpoint ini
     @GET("lookup_all_players.php")
     Call<PlayerResponse> getPlayers(@Query("id") int teamId);
 }

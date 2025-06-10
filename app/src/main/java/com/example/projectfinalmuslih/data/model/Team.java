@@ -17,5 +17,5 @@ public class Team {
     public String strTeamBadge;
 
     @SerializedName("idLeague")
-    public int idLeague; // Tambahkan ini untuk relasi
+    public int idLeague;
 }

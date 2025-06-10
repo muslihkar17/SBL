@@ -19,6 +19,5 @@ public class Player {
     @SerializedName("strCutout")
     public String strCutout;
 
-    // Foreign key untuk relasi
     public int idTeam;
 }

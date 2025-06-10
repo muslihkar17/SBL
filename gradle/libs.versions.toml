@@ -15,6 +15,7 @@ navigationUi = "2.3.5"
 recyclerview = "1.2.1"
 roomRuntime = "2.6.1"
 swiperefreshlayout = "1.1.0"
+navigationSafeArgs = "2.7.7"
 
 [libraries]
 converter-gson = { module = "com.squareup.retrofit2:converter-gson", version.ref = "converterGson" }
@@ -39,4 +40,4 @@ swiperefreshlayout = { group = "androidx.swiperefreshlayout", name = "swiperefre
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }
-
+navigation-safeargs = { id = "androidx.navigation.safeargs", version.ref = "navigationSafeArgs" }

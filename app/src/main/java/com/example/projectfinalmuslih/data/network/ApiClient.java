@@ -18,7 +18,7 @@ public class ApiClient {
                     .build();
 
             retrofit = new Retrofit.Builder()
-                    .baseUrl("https://www.thesportsdb.com/api/v1/json/123/") // tambahkan path yang benar
+                    .baseUrl("https://www.thesportsdb.com/api/v1/json/3/") // API Key diperbarui jika perlu
                     .addConverterFactory(GsonConverterFactory.create())
                     .client(client)
                     .build();
