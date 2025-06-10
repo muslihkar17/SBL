@@ -1,3 +1,4 @@
+// app/build.gradle.kts
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.navigation.safeargs)
@@ -52,8 +53,10 @@ dependencies {
     implementation(libs.navigation.fragment.ktx)
     implementation(libs.navigation.ui.ktx)
 
+    // Room components
     implementation(libs.room.runtime)
     annotationProcessor(libs.room.compiler)
+    // For Kotlin use 'kapt' instead of 'annotationProcessor'
 
     // Glide (Untuk memuat gambar dari URL)
     implementation(libs.glide)

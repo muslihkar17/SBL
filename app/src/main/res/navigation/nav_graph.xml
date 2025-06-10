@@ -51,13 +51,25 @@
             app:argType="string"
             app:nullable="true"
             android:defaultValue="@null" />
+        <argument
+            android:name="teamId"
+            app:argType="integer" />
+        <argument
+            android:name="leagueId"
+            app:argType="string"
+            app:nullable="true"
+            android:defaultValue="@null" />
     </fragment>
 
     <fragment
         android:id="@+id/favoritesFragment"
         android:name="com.example.projectfinalmuslih.ui.FavoritesFragment"
         android:label="Favorites"
-        tools:layout="@layout/fragment_favorites" />
+        tools:layout="@layout/fragment_favorites">
+        <action
+            android:id="@+id/action_favoritesFragment_to_teamDetailFragment"
+            app:destination="@id/teamDetailFragment" />
+    </fragment>
 
     <fragment
         android:id="@+id/settingsFragment"

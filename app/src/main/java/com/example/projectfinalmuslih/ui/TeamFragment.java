@@ -1,3 +1,4 @@
+// app/src/main/java/com/example/projectfinalmuslih/ui/TeamFragment.java
 package com.example.projectfinalmuslih.ui;
 
 import android.os.Bundle;
@@ -60,7 +61,7 @@ public class TeamFragment extends Fragment {
             leagueName = TeamFragmentArgs.fromBundle(getArguments()).getLeagueName();
 
             // Debugger: Log ID yang diterima
-            android.util.Log.d("ID_TRACE", "TeamFragment MENERIMA ID: " + leagueId + " dan NAMA: " + leagueName); // Perbarui log
+            android.util.Log.d("ID_TRACE", "TeamFragment MENERIMA ID: " + leagueId + " dan NAMA: " + leagueName);
         }
 
         executor = Executors.newSingleThreadExecutor();
@@ -100,6 +101,8 @@ public class TeamFragment extends Fragment {
             bundle.putString("teamName", team.strTeam);
             bundle.putString("teamBadgeUrl", team.strTeamBadge);
             bundle.putString("teamDescription", team.strDescriptionEN);
+            bundle.putInt("teamId", team.idTeam); // Perbaikan: Tambahkan teamId
+            bundle.putString("leagueId", team.idLeague); // Perbaikan: Tambahkan leagueId
 
             Navigation.findNavController(view).navigate(R.id.action_teamFragment_to_teamDetailFragment, bundle);
         });
@@ -123,7 +126,7 @@ public class TeamFragment extends Fragment {
 
     private void fetchTeams() {
         // PERUBAHAN DI SINI: Menggunakan leagueName untuk panggilan API
-        android.util.Log.d("ID_TRACE", "TeamFragment MENGGUNAKAN NAMA LIGA: " + this.leagueName + " untuk mengambil data."); // Perbarui log
+        android.util.Log.d("ID_TRACE", "TeamFragment MENGGUNAKAN NAMA LIGA: " + this.leagueName + " untuk mengambil data.");
         swipeRefreshLayout.setRefreshing(true);
         executor.execute(() -> {
             try {
