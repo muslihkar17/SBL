@@ -3,10 +3,14 @@ package com.example.projectfinalmuslih.ui;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
+import android.text.Editable;
+import android.text.TextWatcher;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.EditText;
 import android.widget.Toast;
+
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
@@ -19,6 +23,7 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 import androidx.room.Room;
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
+
 import com.example.projectfinalmuslih.R;
 import com.example.projectfinalmuslih.adapter.LeagueAdapter;
 import com.example.projectfinalmuslih.data.local.AppDatabase;
@@ -26,10 +31,13 @@ import com.example.projectfinalmuslih.data.model.League;
 import com.example.projectfinalmuslih.data.model.LeagueResponse;
 import com.example.projectfinalmuslih.data.network.ApiClient;
 import com.example.projectfinalmuslih.data.network.ApiService;
+
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+
 import retrofit2.Response;
 
 public class LeagueFragment extends Fragment {
@@ -37,12 +45,13 @@ public class LeagueFragment extends Fragment {
     private RecyclerView recyclerView;
     private LeagueAdapter adapter;
     private SwipeRefreshLayout swipeRefreshLayout;
-    private View view;
+    private EditText searchEditText;
 
     private ApiService apiService;
     private AppDatabase appDatabase;
     private ExecutorService executor;
     private Handler handler;
+    private List<League> allLeagues = new ArrayList<>();
 
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
@@ -58,15 +67,13 @@ public class LeagueFragment extends Fragment {
 
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-        view = inflater.inflate(R.layout.fragment_league, container, false);
-        return view;
+        return inflater.inflate(R.layout.fragment_league, container, false);
     }
 
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
 
-        // Setup Toolbar
         com.google.android.material.appbar.MaterialToolbar toolbar = view.findViewById(R.id.toolbar);
         AppCompatActivity activity = (AppCompatActivity) getActivity();
         if (activity != null) {
@@ -75,11 +82,11 @@ public class LeagueFragment extends Fragment {
             AppBarConfiguration appBarConfiguration = new AppBarConfiguration.Builder(navController.getGraph()).build();
             NavigationUI.setupWithNavController(toolbar, navController, appBarConfiguration);
         }
-        toolbar.setTitle("Daftar Liga"); // Set title here
+        toolbar.setTitle("Daftar Liga");
 
-        // Find views
         swipeRefreshLayout = view.findViewById(R.id.swipeRefreshLayout);
         recyclerView = view.findViewById(R.id.recyclerView);
+        searchEditText = view.findViewById(R.id.searchEditText);
         recyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
 
         adapter = new LeagueAdapter();
@@ -91,8 +98,20 @@ public class LeagueFragment extends Fragment {
             Navigation.findNavController(view).navigate(action);
         });
 
-        swipeRefreshLayout.setOnRefreshListener(this::fetchLeagues);
+        searchEditText.addTextChangedListener(new TextWatcher() {
+            @Override
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) { }
 
+            @Override
+            public void onTextChanged(CharSequence s, int start, int before, int count) {
+                filterLeagues(s.toString());
+            }
+
+            @Override
+            public void afterTextChanged(Editable s) { }
+        });
+
+        swipeRefreshLayout.setOnRefreshListener(this::fetchLeagues);
         fetchLeagues();
     }
 
@@ -109,14 +128,26 @@ public class LeagueFragment extends Fragment {
             } finally {
                 List<League> leaguesFromDb = appDatabase.leagueDao().getAllLeagues();
                 handler.post(() -> {
+                    allLeagues.clear();
                     if (leaguesFromDb != null && !leaguesFromDb.isEmpty()) {
-                        adapter.submitList(leaguesFromDb);
+                        allLeagues.addAll(leaguesFromDb);
                     } else {
                         Toast.makeText(getContext(), "Tidak ada data yang tersedia.", Toast.LENGTH_SHORT).show();
                     }
+                    adapter.submitList(new ArrayList<>(allLeagues));
                     swipeRefreshLayout.setRefreshing(false);
                 });
             }
         });
+    }
+
+    private void filterLeagues(String text) {
+        List<League> filteredList = new ArrayList<>();
+        for (League league : allLeagues) {
+            if (league.strLeague.toLowerCase().contains(text.toLowerCase())) {
+                filteredList.add(league);
+            }
+        }
+        adapter.submitList(filteredList);
     }
 }

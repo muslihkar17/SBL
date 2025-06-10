@@ -13,6 +13,9 @@ public class Player {
     @SerializedName("strPlayer")
     public String strPlayer;
 
+    @SerializedName("strTeam")
+    public String strTeam;
+
     @SerializedName("strPosition")
     public String strPosition;
 

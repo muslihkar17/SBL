@@ -3,10 +3,14 @@ package com.example.projectfinalmuslih.ui;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
+import android.text.Editable;
+import android.text.TextWatcher;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.EditText;
 import android.widget.Toast;
+
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
@@ -19,6 +23,7 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 import androidx.room.Room;
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
+
 import com.example.projectfinalmuslih.R;
 import com.example.projectfinalmuslih.adapter.PlayerAdapter;
 import com.example.projectfinalmuslih.data.local.AppDatabase;
@@ -26,10 +31,13 @@ import com.example.projectfinalmuslih.data.model.Player;
 import com.example.projectfinalmuslih.data.model.PlayerResponse;
 import com.example.projectfinalmuslih.data.network.ApiClient;
 import com.example.projectfinalmuslih.data.network.ApiService;
+
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+
 import retrofit2.Response;
 
 public class PlayerFragment extends Fragment {
@@ -37,9 +45,11 @@ public class PlayerFragment extends Fragment {
     private RecyclerView recyclerView;
     private PlayerAdapter adapter;
     private SwipeRefreshLayout swipeRefreshLayout;
-    private View view;
+    private EditText searchEditText;
+
     private int teamId;
     private String teamName;
+    private List<Player> allPlayers = new ArrayList<>();
 
     private ApiService apiService;
     private AppDatabase appDatabase;
@@ -65,15 +75,13 @@ public class PlayerFragment extends Fragment {
 
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-        view = inflater.inflate(R.layout.fragment_player, container, false);
-        return view;
+        return inflater.inflate(R.layout.fragment_player, container, false);
     }
 
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
 
-        // Setup Toolbar
         com.google.android.material.appbar.MaterialToolbar toolbar = view.findViewById(R.id.toolbar);
         AppCompatActivity activity = (AppCompatActivity) getActivity();
         if (activity != null) {
@@ -87,16 +95,26 @@ public class PlayerFragment extends Fragment {
             toolbar.setTitle("Pemain di " + teamName);
         }
 
-        // Find views
         swipeRefreshLayout = view.findViewById(R.id.swipeRefreshLayout);
         recyclerView = view.findViewById(R.id.recyclerView);
+        searchEditText = view.findViewById(R.id.searchEditText);
         recyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
 
         adapter = new PlayerAdapter();
         recyclerView.setAdapter(adapter);
 
-        swipeRefreshLayout.setOnRefreshListener(this::fetchPlayers);
+        searchEditText.addTextChangedListener(new TextWatcher() {
+            @Override
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
+            @Override
+            public void onTextChanged(CharSequence s, int start, int before, int count) {
+                filterPlayers(s.toString());
+            }
+            @Override
+            public void afterTextChanged(Editable s) {}
+        });
 
+        swipeRefreshLayout.setOnRefreshListener(this::fetchPlayers);
         fetchPlayers();
     }
 
@@ -104,29 +122,42 @@ public class PlayerFragment extends Fragment {
         swipeRefreshLayout.setRefreshing(true);
         executor.execute(() -> {
             try {
+                // PASTIKAN PEMANGGILAN INI MENGGUNAKAN "teamId" (int)
                 Response<PlayerResponse> response = apiService.getPlayers(teamId).execute();
                 if (response.isSuccessful() && response.body() != null) {
                     List<Player> players = response.body().getPlayers();
                     if (players != null) {
                         for(Player player : players) {
-                            player.idTeam = teamId; // Memastikan setiap pemain memiliki ID tim
+                            player.idTeam = teamId;
                         }
-                        appDatabase.playerDao().insertAll(players);
                     }
+                    appDatabase.playerDao().syncPlayersForTeam(teamId, players);
                 }
             } catch (IOException e) {
                 handler.post(() -> Toast.makeText(getContext(), "Gagal mengambil data baru, menampilkan data offline.", Toast.LENGTH_SHORT).show());
             } finally {
                 List<Player> playersFromDb = appDatabase.playerDao().getPlayersByTeam(teamId);
                 handler.post(() -> {
+                    allPlayers.clear();
                     if (playersFromDb != null && !playersFromDb.isEmpty()) {
-                        adapter.submitList(playersFromDb);
+                        allPlayers.addAll(playersFromDb);
                     } else {
                         Toast.makeText(getContext(), "Tidak ada data pemain yang tersedia.", Toast.LENGTH_SHORT).show();
                     }
+                    adapter.submitList(new ArrayList<>(allPlayers));
                     swipeRefreshLayout.setRefreshing(false);
                 });
             }
         });
+    }
+
+    private void filterPlayers(String text) {
+        List<Player> filteredList = new ArrayList<>();
+        for (Player player : allPlayers) {
+            if (player.strPlayer.toLowerCase().contains(text.toLowerCase())) {
+                filteredList.add(player);
+            }
+        }
+        adapter.submitList(filteredList);
     }
 }
