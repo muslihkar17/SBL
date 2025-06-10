@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="utf-8"?>
+<navigation xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/nav_graph"
+    app:startDestination="@id/leagueFragment">
+
+    <fragment
+        android:id="@+id/leagueFragment"
+        android:name="com.example.projectfinalmuslih.ui.LeagueFragment"
+        android:label="Daftar Liga"
+        tools:layout="@layout/fragment_league">
+        <action
+            android:id="@+id/action_leagueFragment_to_teamFragment"
+            app:destination="@id/teamFragment" />
+    </fragment>
+
+    <fragment
+        android:id="@+id/teamFragment"
+        android:name="com.example.projectfinalmuslih.ui.TeamFragment"
+        android:label="Daftar Tim"
+        tools:layout="@layout/fragment_team">
+        <argument
+            android:name="league_id"
+            app:argType="integer" />
+        <argument
+            android:name="league_name"
+            app:argType="string" />
+        <action
+            android:id="@+id/action_teamFragment_to_playerFragment"
+            app:destination="@id/playerFragment" />
+    </fragment>
+
+    <fragment
+        android:id="@+id/playerFragment"
+        android:name="com.example.projectfinalmuslih.ui.PlayerFragment"
+        android:label="Daftar Pemain"
+        tools:layout="@layout/fragment_player">
+        <argument
+            android:name="team_id"
+            app:argType="integer" />
+        <argument
+            android:name="team_name"
+            app:argType="string" />
+    </fragment>
+</navigation>
